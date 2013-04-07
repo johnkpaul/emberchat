@@ -3,12 +3,39 @@
 //= require ember
 //= require_tree .
 
+// List of HTML entities for escaping.
+var htmlEscapes = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '/': '&#x2F;'
+};
+
+// Regex containing the keys listed immediately above.
+var htmlEscaper = /[&<>"'\/]/g;
+
+// Escape a string for HTML interpolation.
+var escape = function(string) {
+  return ('' + string).replace(htmlEscaper, function(match) {
+    return htmlEscapes[match];
+  });
+};
+
 Ember.Handlebars.registerBoundHelper("emojify", function(text) {
+  if (text) {
+    text = escape(text);
+  } else {
+    return "";
+  }
+
   emojis.forEach(function(emoji) {
     var regexp = new RegExp(":" + emoji + ":", "g");
-    text = text && $("<div/>").html(text).text().replace(regexp, "<img src=\"/assets/emoji/" + emoji + ".png\">");
+    text = text.replace(regexp, "<img src=\"/assets/emoji/" + emoji + ".png\">");
   });
-  return new Handlebars.SafeString(text || "");
+
+  return new Handlebars.SafeString(text);
 });
 
 var CATSOCKET_API_KEY = $("meta[name=catsocket-api-key]").attr("content");
