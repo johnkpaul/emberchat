@@ -5,14 +5,15 @@
       .user= this
 
   .messages
-    each messages
-      if text
-        .message
-          .author
-            = from
-            |:
-          .text == emojify text
-          .time= formattedTimestamp
+    if events.isLoaded
+      each messages itemViewClass="App.MessageView"
+        .author
+          = unbound from
+          |:
+        .text= emojify text
+        .time= unbound formattedTimestamp
+    else
+      | Loading messages...
 
 .footer
   Ember.TextField valueBinding="nickname" placeholder="Nickname" class="nickname"

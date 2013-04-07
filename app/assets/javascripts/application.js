@@ -4,14 +4,17 @@
 //= require moment
 //= require_tree .
 
-var EMOJI_REGEXES = emojis.map(function(emoji) {
-  // need to escape for regex
-  emoji = emoji.replace("+", "\\+");
-  return new RegExp(":(" + emoji + "):", "g");
+var EMOJI_LOOKUP = {};
+
+emojis.forEach(function(emoji) {
+  EMOJI_LOOKUP[emoji] = emoji;
 });
 
-Ember.Handlebars.registerBoundHelper("emojify", function(text) {
-  var escape = Handlebars.Utils.escapeExpression;
+var EMOJI_REGEX = /:([^\s:]+):/g;
+
+Ember.Handlebars.registerHelper("emojify", function(propertyPath) {
+  var escape = Handlebars.Utils.escapeExpression,
+      text = Ember.Handlebars.get(this, propertyPath);
 
   if (text) {
     text = escape(text);
@@ -19,9 +22,14 @@ Ember.Handlebars.registerBoundHelper("emojify", function(text) {
     return "";
   }
 
-  EMOJI_REGEXES.forEach(function(regexp) {
-    text = text.replace(regexp, '<img src="/assets/emoji/$1.png">');
-  });
+  var possibleEmojis = EMOJI_REGEX.exec(text),
+      matches = possibleEmojis && possibleEmojis.length || 0,
+      foundEmoji;
+  for (var i = 1; i < matches; i++) {
+    if (foundEmoji = EMOJI_LOOKUP[possibleEmojis[i]];) {
+      text = text.replace(":%@:".fmt(foundEmoji), '<img src="/assets/emoji/%@.png">'.fmt(foundEmoji));
+    }
+  }
 
   return new Handlebars.SafeString(text);
 });
@@ -37,7 +45,7 @@ App.Router.map(function() {
 App.Room = Ember.Object.extend({
   id: null,
 
-  messages: function() {
+  events: function() {
     var records = Ember.ArrayProxy.create({content: Ember.A(), isLoaded: false});
 
     // hack hack hack
@@ -55,11 +63,21 @@ App.Room = Ember.Object.extend({
       }).filter(function(m) {
         return !!m;
       });
-      records.set('content', messages);
-      records.set('isLoaded', true);
+
+      Ember.run(function() {
+        records.set('content', messages);
+        records.set('isLoaded', true);
+      });
     });
     return records;
-  }.property()
+  }.property(),
+
+  // FIXME: current messages is only generated upon events.isLoaded. We push to it directly when messages are received
+  messages: function() {
+    return this.get('events').filter(function(e) {
+      return e.get('text') && (!e.get('type') || e.get('type') === 'm')
+    });
+  }.property('events.isLoaded')
 });
 
 App.Room.find = function(id) {
@@ -75,7 +93,7 @@ App.Message = Ember.Object.extend({
   }.property().volatile(),
 
   toJSON: function() {
-    return this.getProperties('from', 'text', 'timestamp');
+    return this.getProperties('from', 'text', 'timestamp', 'type');
   },
 
   // borrowed from another app :)
@@ -169,7 +187,8 @@ App.RoomController = Ember.ObjectController.extend({
   },
 
   _update: function(msgData) {
-    var messages = this.get('messages'),
+    var events = this.get('events'),
+        messages = this.get('messages'),
         users = this.get('users'),
         data;
 
@@ -182,8 +201,10 @@ App.RoomController = Ember.ObjectController.extend({
     if (data.type === 'p') {
       users.removeObject(data.from);
     } else {
-      if (!data.type || data.type === 'm') {
-        messages.pushObject(App.Message.create({text: data.text, from: data.from, type: data.type}));
+      var message = App.Message.create({text: data.text, from: data.from, type: data.type});
+      events.pushObject(message);
+      if (data.text && (!data.type || data.type === 'm')) {
+        messages.pushObject(message);
       }
       if (!users.contains(data.from)) {
         users.pushObject(data.from);
@@ -221,4 +242,8 @@ App.RoomView = Ember.View.extend({
       Ember.run.scheduleOnce('afterRender', this, this._scrollToBottom);
     }
   }.observes('controller.messages.[]')
+});
+
+App.MessageView = Ember.View.extend({
+  classNames: ['message']
 });
