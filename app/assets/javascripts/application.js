@@ -3,36 +3,23 @@
 //= require ember
 //= require_tree .
 
-// List of HTML entities for escaping.
-var htmlEscapes = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#x27;',
-  '/': '&#x2F;'
-};
-
-// Regex containing the keys listed immediately above.
-var htmlEscaper = /[&<>"'\/]/g;
-
-// Escape a string for HTML interpolation.
-var escape = function(string) {
-  return ('' + string).replace(htmlEscaper, function(match) {
-    return htmlEscapes[match];
-  });
-};
+var EMOJI_REGEXES = emojis.map(function(emoji) {
+  // need to escape for regex
+  emoji = emoji.replace("+", "\\+");
+  return new RegExp(":(" + emoji + "):", "g");
+});
 
 Ember.Handlebars.registerBoundHelper("emojify", function(text) {
+  var escape = Handlebars.Utils.escapeExpression;
+
   if (text) {
     text = escape(text);
   } else {
     return "";
   }
 
-  emojis.forEach(function(emoji) {
-    var regexp = new RegExp(":" + emoji + ":", "g");
-    text = text.replace(regexp, "<img src=\"/assets/emoji/" + emoji + ".png\">");
+  EMOJI_REGEXES.forEach(function(regexp) {
+    text = text.replace(regexp, '<img src="/assets/emoji/$1.png">');
   });
 
   return new Handlebars.SafeString(text);
