@@ -6,9 +6,9 @@
 Ember.Handlebars.registerBoundHelper("emojify", function(text) {
   emojis.forEach(function(emoji) {
     var regexp = new RegExp(":" + emoji + ":", "g");
-    text = text.replace(regexp, "<img src=\"/assets/emoji/" + emoji + ".png\">");
+    text = text && text.replace(regexp, "<img src=\"/assets/emoji/" + emoji + ".png\">");
   });
-  return new Handlebars.SafeString(text);
+  return new Handlebars.SafeString(text || "");
 });
 
 var CATSOCKET_API_KEY = $("meta[name=catsocket-api-key]").attr("content");
@@ -29,7 +29,16 @@ App.Room = Ember.Object.extend({
     var params = {channel: this.get('id'), timestamp: 0, guid: "d8363d8e-2ccf-9e75-09d5-22c1912d2a6f", api_key: CATSOCKET_API_KEY};
     $.getJSON("http://catsocket.com:5000", params).then(function(json) {
       var messages = json.data.map(function(m) {
-        return App.Message.create(JSON.parse(m));
+        var messageData = {};
+        try {
+          messageData = JSON.parse(m);
+        } catch(e) {}
+
+        if (messageData) {
+          return App.Message.create(messageData);
+        }
+      }).filter(function(m) {
+        return !!m;
       });
       records.set('content', messages);
       records.set('isLoaded', true);
@@ -91,8 +100,15 @@ App.RoomController = Ember.ObjectController.extend({
 
   _update: function(msgData) {
     var messages = this.get('messages'),
-        data = JSON.parse(msgData);
-    messages.pushObject(App.Message.create({text: data.text, from: data.from}));
+        data;
+
+    try {
+      data = JSON.parse(msgData);
+    } catch(e) {}
+
+    if (data) {
+      messages.pushObject(App.Message.create({text: data.text, from: data.from}));
+    }
   },
 
   sendMessage: function() {
@@ -125,4 +141,4 @@ App.RoomView = Ember.View.extend({
       Ember.run.scheduleOnce('afterRender', this, this._scrollToBottom);
     }
   }.observes('controller.messages.[]')
-})
+});
