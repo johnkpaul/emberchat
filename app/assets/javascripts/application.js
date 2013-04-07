@@ -26,9 +26,8 @@ Ember.Handlebars.registerHelper("emojify", function(propertyPath) {
       matches = possibleEmojis && possibleEmojis.length || 0,
       foundEmoji;
   for (var i = 1; i < matches; i++) {
-    if (foundEmoji = EMOJI_LOOKUP[possibleEmojis[i]];) {
-      text = text.replace(":%@:".fmt(foundEmoji), '<img src="/assets/emoji/%@.png">'.fmt(foundEmoji));
-    }
+    foundEmoji = EMOJI_LOOKUP[possibleEmojis[i]]
+    if (foundEmoji) { text = text.replace(":%@:".fmt(foundEmoji), '<img src="/assets/emoji/%@.png">'.fmt(foundEmoji)); }
   }
 
   return new Handlebars.SafeString(text);
@@ -75,7 +74,7 @@ App.Room = Ember.Object.extend({
   // FIXME: current messages is only generated upon events.isLoaded. We push to it directly when messages are received
   messages: function() {
     return this.get('events').filter(function(e) {
-      return e.get('text') && (!e.get('type') || e.get('type') === 'm')
+      return e.get('text') && (!e.get('type') || e.get('type') === 'm');
     });
   }.property('events.isLoaded')
 });
@@ -153,7 +152,7 @@ App.RoomController = Ember.ObjectController.extend({
     for (var i = messagesLength - 1; i >= 0; i--) {
       var message = messages.objectAt(i);
 
-      if (message.get('timestamp') < (+new Date - tenMinutesAgo)) { break; }
+      if (message.get('timestamp') < (+new Date() - tenMinutesAgo)) { break; }
       if (message.get('type') === 'p') { continue; }
 
       if (!newUsers.contains(message.get('from'))) {
