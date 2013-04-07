@@ -232,13 +232,27 @@ App.RoomView = Ember.View.extend({
     this._scrollToBottom();
   },
 
+  _scrollIfNecessary: function() {
+    var messages = $('.messages')[0];
+    var scrollDistance = messages.scrollHeight 
+                         - (messages.scrollTop + messages.clientHeight);
+    var isScrolledDown = scrollDistance < 50;
+    if (isScrolledDown) {
+      this._scrollToBottom();
+    }
+  },
+
   _scrollToBottom: function() {
     $('.messages')[0].scrollTop = 99999;
   },
 
   messagesDidChange: function() {
     if (this.state === 'inDOM') {
-      Ember.run.scheduleOnce('afterRender', this, this._scrollToBottom);
+      if (!this._messagesLoadedOnce) {
+        this._messagesLoadedOnce = true;
+        Ember.run.scheduleOnce('afterRender', this, this._scrollToBottom);
+      }
+      Ember.run.scheduleOnce('afterRender', this, this._scrollIfNecessary);
     }
   }.observes('controller.messages.[]')
 });
