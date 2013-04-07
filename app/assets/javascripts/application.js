@@ -108,6 +108,27 @@ App.RoomController = Ember.ObjectController.extend({
     return [];
   }.property(),
 
+  regenerateUsers: function() {
+    var messages = this.get('messages'),
+        messagesLength = this.get('messages.length'),
+        users = this.get('users'),
+        newUsers = [],
+        tenMinutesAgo = 60 * 10 * 1000;
+
+    for (var i = messagesLength - 1; i >= 0; i--) {
+      var message = messages.objectAt(i);
+
+      if (message.get('timestamp') < (+new Date - tenMinutesAgo)) { break; }
+      if (message.get('type') === 'p') { continue; }
+
+      if (!newUsers.contains(message.get('from'))) {
+        newUsers.pushObject(message.get('from'));
+      }
+    }
+
+    this.set('users', newUsers);
+  },
+
   contentWillChange: function() {
     var roomId = this.get('id');
     if (roomId) {
@@ -122,6 +143,7 @@ App.RoomController = Ember.ObjectController.extend({
 
     this._timer = setInterval(function() {
       this._publish(App.Message.create({type: 'j', from: this.get('nickname')}));
+      this.regenerateUsers();
     }.bind(this), 10000);
   }.observes('content'),
 
