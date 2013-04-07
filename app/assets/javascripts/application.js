@@ -1,6 +1,7 @@
 //= require jquery
 //= require handlebars.runtime
 //= require ember
+//= require moment
 //= require_tree .
 
 var EMOJI_REGEXES = emojis.map(function(emoji) {
@@ -75,7 +76,23 @@ App.Message = Ember.Object.extend({
 
   toJSON: function() {
     return this.getProperties('from', 'text', 'timestamp');
-  }
+  },
+
+  // borrowed from another app :)
+  formattedTimestamp: function() {
+    var timestamp = this.get('timestamp'),
+        now = moment(),
+        today = now.startOf('day'),
+        local_time = moment.utc(timestamp).local();
+
+    if(local_time.isAfter(today)) {
+      return local_time.format('h:mmA');
+    } else if (today.diff(local_time, 'hours') <= 144) {
+      return local_time.format('dddd h:mmA');
+    } else {
+      return local_time.format('MM/DD/YY hA');
+    }
+  }.property('timestamp')
 });
 
 App.IndexRoute = Ember.Route.extend({

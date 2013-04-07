@@ -12,6 +12,7 @@
             = from
             |:
           .text == emojify text
+          .time= formattedTimestamp
 
 .footer
   Ember.TextField valueBinding="nickname" placeholder="Nickname" class="nickname"
