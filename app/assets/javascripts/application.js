@@ -174,7 +174,7 @@ App.RoomView = Ember.View.extend({
   },
 
   _scrollToBottom: function() {
-    $('.room')[0].scrollTop = 99999;
+    $('.messages')[0].scrollTop = 99999;
   },
 
   messagesDidChange: function() {
