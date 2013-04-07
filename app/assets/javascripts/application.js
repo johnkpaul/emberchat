@@ -104,7 +104,7 @@ App.RoomView = Ember.View.extend({
   templateName: "room",
 
   didInsertElement: function() {
-    this.$('.message')[0].focus();
+    this.$('.new-message')[0].focus();
     this._scrollToBottom();
   },
 

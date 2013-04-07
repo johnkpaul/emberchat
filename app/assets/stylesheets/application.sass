@@ -4,7 +4,7 @@ html
 .room
   position: absolute
   top: 0
-  bottom: 30px
+  bottom: 50px
   left: 0
   right: 0
   overflow: auto
@@ -14,29 +14,79 @@ html
   bottom: 0
   left: 0
   right: 0
-  height: 30px
+  height: 35px
   background: #ccc
+  padding: 10px 10px 6px
 
   input[type=text]
     font-size: 10pt
+    padding: 5px
+    float: left
 
-  .nickname
-    position: absolute
-    top: 0
-    bottom: 0
-    width: 100px
-    left: 0
+    &:focus
+      box-shadow: 0 0 2px #666
+      border: 1px solid #aaa
+
+    &.nickname
+      width: 130px
+      margin-right: 10px
+
+    &.new-message
+      width: 50%
+
+  button.btn-send
+    float: right
+    width: 60px
+    border-radius: 3px
+
+    color: #FFFFFF
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25)
+    background-color: #E2644E
+    background-image: -moz-linear-gradient(top, #FB9473, #E2644E)
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FB9473), to(#E2644E))
+    background-image: -webkit-linear-gradient(top, #FB9473, #E2644E)
+    background-image: -o-linear-gradient(top, #FB9473, #E2644E)
+    background-image: linear-gradient(to bottom, #FB9473, #E2644E)
+    background-repeat: repeat-x
+    border-color: #E2644E
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25)
+
+  button.btn-send:hover,
+  button.btn-send:active,
+  button.btn-send.active,
+  button.btn-send.disabled,
+  button.btn-send[disabled]
+    color: #fff
+    background-color: #E2644E
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25)
+    background-color: #D45A44
+    background-image: -moz-linear-gradient(top, #E3805F, #D45A44)
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#E3805F), to(#D45A44))
+    background-image: -webkit-linear-gradient(top, #E3805F, #D45A44)
+    background-image: -o-linear-gradient(top, #E3805F, #D45A44)
+    background-image: linear-gradient(to bottom, #E3805F, #D45A44)
+    background-repeat: repeat-x
+    border-color: #D45A44
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25)
+
+
+.messages
+  color: #474545
+  padding: 10px
 
   .message
-    position: absolute
-    top: 0
-    bottom: 0
-    left: 100px
-    right: 60px
+    padding: 10px
+    margin: 4px 0
+    border-radius: 2px
+    border: 1px solid #c7c6bf
+    background-color: #efeee7
+    box-shadow: inset 1px 1px rgba(255,255,255,.75)
+    overflow: hidden
 
-  button
-    position: absolute
-    top: 0
-    bottom: 0
-    width: 60px
-    right: 0
+  .author
+    font-weight: bold
+    float: left
+    margin-right: 5px
+
+  .text
+    float: left

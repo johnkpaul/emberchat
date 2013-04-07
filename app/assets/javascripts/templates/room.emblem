@@ -1,13 +1,13 @@
 .room
-  table
+  .messages
     each messages
-      tr
-        td
+      .message
+        .author
           = from
           |:
-        td= text
+        .text = text
 
 .footer
   Ember.TextField valueBinding="nickname" placeholder="Nickname" class="nickname"
-  Ember.TextField valueBinding="messageText" placeholder="Message" action="sendMessage" class="message"
-  button click="sendMessage" Send
+  Ember.TextField valueBinding="messageText" placeholder="Message" action="sendMessage" class="new-message"
+  button.btn.btn-send click="sendMessage" Send
