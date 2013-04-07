@@ -71,6 +71,11 @@ App.RoomController = Ember.ObjectController.extend({
   nickname: getNickname(),
   messageText: null,
 
+  contentWillChange: function() {
+    var roomName = this.get('id');
+    CS.unsubscribe(roomName);
+  }.observesBefore('content'),
+
   contentDidChange: function() {
     var roomName = this.get('id');
     CS.subscribe(roomName, this._update.bind(this));
