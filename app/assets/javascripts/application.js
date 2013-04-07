@@ -6,7 +6,7 @@
 Ember.Handlebars.registerBoundHelper("emojify", function(text) {
   emojis.forEach(function(emoji) {
     var regexp = new RegExp(":" + emoji + ":", "g");
-    text = text && text.replace(regexp, "<img src=\"/assets/emoji/" + emoji + ".png\">");
+    text = text && $("<div/>").html(text).text().replace(regexp, "<img src=\"/assets/emoji/" + emoji + ".png\">");
   });
   return new Handlebars.SafeString(text || "");
 });
