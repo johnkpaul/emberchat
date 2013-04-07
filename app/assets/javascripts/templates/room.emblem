@@ -5,7 +5,7 @@
         .author
           = from
           |:
-        .text = text
+        .text == emojify text
 
 .footer
   Ember.TextField valueBinding="nickname" placeholder="Nickname" class="nickname"

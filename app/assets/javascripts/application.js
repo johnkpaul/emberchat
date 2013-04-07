@@ -3,6 +3,14 @@
 //= require ember
 //= require_tree .
 
+Ember.Handlebars.registerBoundHelper("emojify", function(text) {
+  emojis.forEach(function(emoji) {
+    var regexp = new RegExp(":" + emoji + ":", "g");
+    text = text.replace(regexp, "<img src=\"/assets/emoji/" + emoji + ".png\">");
+  });
+  return new Handlebars.SafeString(text);
+});
+
 var CATSOCKET_API_KEY = $("meta[name=catsocket-api-key]").attr("content");
 
 var App = Ember.Application.create();
