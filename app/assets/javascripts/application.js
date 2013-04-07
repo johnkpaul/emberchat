@@ -68,6 +68,7 @@ App.Room.find = function(id) {
 App.Message = Ember.Object.extend({
   from: null,
   text: null,
+  type: 'm', // m for message, j for join, p for part
   timestamp: function() {
     return +new Date();
   }.property().volatile(),
@@ -101,27 +102,53 @@ function getNickname() {
 App.RoomController = Ember.ObjectController.extend({
   nickname: getNickname(),
   messageText: null,
+  _timer: null,
+
+  users: function() {
+    return [];
+  }.property(),
 
   contentWillChange: function() {
-    var roomName = this.get('id');
-    CS.unsubscribe(roomName);
+    var roomId = this.get('id');
+    if (roomId) {
+      this._publish(App.Message.create({type: 'p', from: this.get('nickname')}));
+      CS.unsubscribe(this.get('id'));
+    }
+    if (this._timer) { clearInterval(this._timer); }
   }.observesBefore('content'),
 
   contentDidChange: function() {
-    var roomName = this.get('id');
-    CS.subscribe(roomName, this._update.bind(this));
+    CS.subscribe(this.get('id'), this._update.bind(this));
+
+    this._timer = setInterval(function() {
+      this._publish(App.Message.create({type: 'j', from: this.get('nickname')}));
+    }.bind(this), 10000);
   }.observes('content'),
+
+  _publish: function(message) {
+    CS.publish(this.get('id'), JSON.stringify(message.toJSON()), true);
+  },
 
   _update: function(msgData) {
     var messages = this.get('messages'),
+        users = this.get('users'),
         data;
 
     try {
       data = JSON.parse(msgData);
     } catch(e) {}
 
-    if (data) {
-      messages.pushObject(App.Message.create({text: data.text, from: data.from}));
+    if (!data) { return; }
+
+    if (data.type === 'p') {
+      users.removeObject(data.from);
+    } else {
+      if (!data.type || data.type === 'm') {
+        messages.pushObject(App.Message.create({text: data.text, from: data.from, type: data.type}));
+      }
+      if (!users.contains(data.from)) {
+        users.pushObject(data.from);
+      }
     }
   },
 

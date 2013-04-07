@@ -1,11 +1,17 @@
 .room
+  .users
+    h4 Who's here?
+    each users
+      .user= this
+
   .messages
     each messages
-      .message
-        .author
-          = from
-          |:
-        .text == emojify text
+      if text
+        .message
+          .author
+            = from
+            |:
+          .text == emojify text
 
 .footer
   Ember.TextField valueBinding="nickname" placeholder="Nickname" class="nickname"
